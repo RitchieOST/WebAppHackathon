@@ -5,44 +5,137 @@
     <meta charset="UTF-8">
     <title>Energie-Visualisierung mit Wetterkarte</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 20px; }
-        h1 { color: #2c3e50; }
-        img { max-width: 600px; border: 2px solid #ccc; border-radius: 8px; margin-bottom: 20px; }
-        #map { height: 500px; width: 80%; margin: 0 auto; border: 2px solid #ccc; border-radius: 8px; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #2c3e50; text-align: center; }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px; /* Abstand zwischen Bild/Karte und Text */
+            margin-top: 20px;
+        }
+        .left {
+            flex: 2; /* nimmt mehr Platz ein */
+            text-align: center;
+        }
+        .right {
+            flex: 1; /* schmalere Spalte für Text */
+            text-align: left;
+            border-left: 2px solid #ccc;
+            padding-left: 20px;
+        }
+        img {
+            max-width: 600px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
     </style>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 </head>
 <body>
     <h1>Visualisierung Einzugsgebiet KW-Samina</h1>
-    <img src="{% static 'mapfish-print-report.png' %}" alt="Einzugsgebiet Vaduz">
 
-    <h1>Vergleichsfläche Niederschlag und Sonneneinstrahlung</h1>
-    <img src="{% static 'img.png' %}" alt="Einzugsgebiet Vaduz">
-    <!-- Wetterkarte -->
-    <h1>Live-Wetterkarte</h1>
-    <div id="map"></div>
+    <div class="container">
+        <!-- Linke Spalte mit Bildern und Karte -->
+        <div class="left">
+            <h2>Einzugsgebiet</h2>
+            <img src="{% static 'mapfish-print-report.png' %}" alt="Einzugsgebiet Vaduz">
 
-#
+            <h2>Vergleichsfläche Niederschlag und Sonneneinstrahlung</h2>
+            <img src="{% static 'img.png' %}" alt="Vergleichsfläche">
 
-    <!-- Leaflet JS -->
+            <h2>Live-Wetterkarte</h2>
+            <div id="map"></div>
+        </div>
+
+        <!-- Rechte Spalte mit Text -->
+        <div class="right">
+            <h2>Beschreibung</h2>
+            <p>
+
+                <br>
+
+                Wasserkraft im Vergleich zu PV Erstelle ein Diagramm zum Verlauf des Niederschlags und der Globalstrahlung zu einer frei gewählten Messstation von SwissMetNet. Für eine bessere Aussage des Diagramms stelle einen kumulierten Verlauf dar, d.h. eine ansteigende Kurve übers Jahr, welche die Energiezunahme darstellt. Interpretiere das Diagramm hinsichtlich der Unterschiede der einzelnen Jahre. Zeige das Wasserkraftpotenzial pro Jahr durch eine Wahl des Einzugsgebiets (u.a. mit Bildern einer Karte) dar.
+                Visualisierung des Einzugsgebiets KW-Samina mit den
+                relevanten Wetterdaten.<br>
+                    <br>
+                    <br>
+                <h2>Steps</h2>
+                    <br>
+
+                1. Historische Niederschlags- und Strahlungswerte für den Graphen
+
+                   über URL abgefragt.<br>
+                    <br>
+
+
+                2. Flächenmass des Einzugsgebietes über Geoportal kombiniert.<br>
+                    <br>
+
+
+
+                3. Niederschlagsmenge über Gesamtfläche mit Fallhöhe ergibt Energie-
+
+                   menge im KW-Samina (verworfen)<br>
+                <br>
+
+                4. Graph über matplotlib erzeugen und als PNG automatisch im "static"-Verz.
+
+                  abspeichern. => Übergabepunkt an Django<br>
+                <br>
+
+                5. Live-Wetterkarte über API per Key abgefragt und in das HTML eingebunden<br>
+
+
+                <h2>Lessons learned</h2>
+            
+                
+
+            </p>
+            <p>
+                1. GitHub: Push/Pull befehle am besten mit Absprache<br>
+                <br>
+                2. Über API richtige Daten abfragen (Plausibilitätskontrolle)<br>
+                <br>
+                3. Projekt von Anfang an in Django erstellen, falls Visualisierung gewünscht.<br>
+                <br>
+                4. Ordnerstruktur einhalten. Files dort ablegen wo sie gebraucht werden<br>
+                <br>
+                5. KI-generierte Codes probieren zu verstehen, sonst wird Debugging schwierig<br>
+                
+                <br>
+                <br>
+                
+                <h2>Tba</h2>
+                
+                => Eingabefeld für Datum und Ort<br><br>
+                => Outputfenster für Ausgewählte Fläche direkt ab Geoportal<br><br>
+                => Outputfenster für potenzielle Energie für ausgewählte Fläsche<br><br>
+            
+                
+            </p>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Beispielkoordinaten Vaduz
         var lat = {{ lat }};
         var lon = {{ lon }};
-
-        // Karte initialisieren
         var map = L.map('map').setView([lat, lon], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Wetterdaten aus Django-Context (falls du sie im View übergibst)
         var temp = "{{ temp|default:'--' }}";
         var weather = "{{ weather|default:'Keine Daten' }}";
 
-        // Marker mit Popup
         L.marker([lat, lon]).addTo(map)
             .bindPopup("Temperatur: " + temp + "°C<br>Wetter: " + weather)
             .openPopup();
