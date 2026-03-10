@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Energie-Visualisierung mit Wetterkarte</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 20px; }
+        h1 { color: #2c3e50; }
+        img { max-width: 600px; border: 2px solid #ccc; border-radius: 8px; margin-bottom: 20px; }
+        #map { height: 500px; width: 80%; margin: 0 auto; border: 2px solid #ccc; border-radius: 8px; }
+    </style>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body>
+    <h1>Einzugsgebiet Vaduz</h1>
+    <img src="{% static 'mapfish-print-report.png' %}" alt="Einzugsgebiet Vaduz">
+
+    <!-- Wetterkarte -->
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Beispielkoordinaten Vaduz
+        var lat = 47.1416;
+        var lon = 9.5215;
+
+        // Karte initialisieren
+        var map = L.map('map').setView([lat, lon], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Wetterdaten aus Django-Context (falls du sie im View übergibst)
+        var temp = "{{ temp|default:'--' }}";
+        var weather = "{{ weather|default:'Keine Daten' }}";
+
+        // Marker mit Popup
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup("Temperatur: " + temp + "°C<br>Wetter: " + weather)
+            .openPopup();
+    </script>
+</body>
+</html>
