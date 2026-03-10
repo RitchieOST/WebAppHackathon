@@ -27,4 +27,5 @@ urlpatterns = [
 
 
 
+    path("weather", views.weather_map, name="weather_map"),
 ]
